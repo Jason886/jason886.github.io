@@ -295,7 +295,96 @@ $ cmake ../src \
 
 ##### 使用Standalone Toolchain来交叉编译 for Android
 
+A toolchain file may configure [Makefile Generators](https://cmake.org/cmake/help/v3.20/manual/cmake-generators.7.html#makefile-generators) or the [`Ninja`](https://cmake.org/cmake/help/v3.20/generator/Ninja.html#generator:Ninja) generator to target Android for cross-compiling using a standalone toolchain.
+
+通过下面的变量来配置Standalone Toolchain：
+
++ `CMAKE_SYSTEM_NAME`
+
+  设置为`Android`。必须设置为这个值以使启用Android交叉编译。
+
++ `CMAKE_ANDROID_STANDALONE_TOOLCHAIN`
+
+  Set to the absolute path to the standalone toolchain root directory. A `${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot` directory must exist. If not specified, a default for this variable will be chosen as specified [above](https://cmake.org/cmake/help/v3.20/manual/cmake-toolchains.7.html#cross-compiling-for-android).
+
++ [`CMAKE_ANDROID_ARM_MODE`](https://cmake.org/cmake/help/v3.20/variable/CMAKE_ANDROID_ARM_MODE.html#variable:CMAKE_ANDROID_ARM_MODE)
+
+  When the standalone toolchain targets ARM, optionally set this to `ON` to target 32-bit ARM instead of 16-bit Thumb. See variable documentation for details.
+
++ [`CMAKE_ANDROID_ARM_NEON`](https://cmake.org/cmake/help/v3.20/variable/CMAKE_ANDROID_ARM_NEON.html#variable:CMAKE_ANDROID_ARM_NEON)
+
+  When the standalone toolchain targets ARM v7, optionally set thisto `ON` to target ARM NEON devices. See variable documentation for details.
+
+The following variables will be computed and provided automatically:
+
+- [`CMAKE_SYSTEM_VERSION`](https://cmake.org/cmake/help/v3.20/variable/CMAKE_SYSTEM_VERSION.html#variable:CMAKE_SYSTEM_VERSION)
+
+  The Android API level detected from the standalone toolchain.
+
+- [`CMAKE_ANDROID_ARCH_ABI`](https://cmake.org/cmake/help/v3.20/variable/CMAKE_ANDROID_ARCH_ABI.html#variable:CMAKE_ANDROID_ARCH_ABI)
+
+  The Android ABI detected from the standalone toolchain.
+
+- [`CMAKE__ANDROID_TOOLCHAIN_PREFIX`](https://cmake.org/cmake/help/v3.20/variable/CMAKE_LANG_ANDROID_TOOLCHAIN_PREFIX.html#variable:CMAKE__ANDROID_TOOLCHAIN_PREFIX)
+
+  The absolute path prefix to the `binutils` in the standalone toolchain.
+
+- [`CMAKE__ANDROID_TOOLCHAIN_SUFFIX`](https://cmake.org/cmake/help/v3.20/variable/CMAKE_LANG_ANDROID_TOOLCHAIN_SUFFIX.html#variable:CMAKE__ANDROID_TOOLCHAIN_SUFFIX)
+
+  The host platform suffix of the `binutils` in the standalone toolchain.
+
+For example, a toolchain file might contain:
+
+```
+set(CMAKE_SYSTEM_NAME Android)
+set(CMAKE_ANDROID_STANDALONE_TOOLCHAIN /path/to/android-toolchain)
+```
+
+Alternatively one may specify the values without a toolchain file:
+
+```
+$ cmake ../src \
+  -DCMAKE_SYSTEM_NAME=Android \
+  -DCMAKE_ANDROID_STANDALONE_TOOLCHAIN=/path/to/android-toolchain
+```
+
+
+
+##### 使用NVIDIA Nsight Tegra Visual Studio Edition 交叉编译 for Android
+
+A toolchain file to configure one of the [Visual Studio Generators](https://cmake.org/cmake/help/v3.20/manual/cmake-generators.7.html#visual-studio-generators) to build using NVIDIA Nsight Tegra targeting Android may look like this:
+
+```
+set(CMAKE_SYSTEM_NAME Android)
+```
+
+The [`CMAKE_GENERATOR_TOOLSET`](https://cmake.org/cmake/help/v3.20/variable/CMAKE_GENERATOR_TOOLSET.html#variable:CMAKE_GENERATOR_TOOLSET) may be set to select the Nsight Tegra "Toolchain Version" value.
+
+See also target properties:
+
+- [`ANDROID_ANT_ADDITIONAL_OPTIONS`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_ANT_ADDITIONAL_OPTIONS.html#prop_tgt:ANDROID_ANT_ADDITIONAL_OPTIONS)
+- [`ANDROID_API_MIN`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_API_MIN.html#prop_tgt:ANDROID_API_MIN)
+- [`ANDROID_API`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_API.html#prop_tgt:ANDROID_API)
+- [`ANDROID_ARCH`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_ARCH.html#prop_tgt:ANDROID_ARCH)
+- [`ANDROID_ASSETS_DIRECTORIES`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_ASSETS_DIRECTORIES.html#prop_tgt:ANDROID_ASSETS_DIRECTORIES)
+- [`ANDROID_GUI`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_GUI.html#prop_tgt:ANDROID_GUI)
+- [`ANDROID_JAR_DEPENDENCIES`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_JAR_DEPENDENCIES.html#prop_tgt:ANDROID_JAR_DEPENDENCIES)
+- [`ANDROID_JAR_DIRECTORIES`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_JAR_DIRECTORIES.html#prop_tgt:ANDROID_JAR_DIRECTORIES)
+- [`ANDROID_JAVA_SOURCE_DIR`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_JAVA_SOURCE_DIR.html#prop_tgt:ANDROID_JAVA_SOURCE_DIR)
+- [`ANDROID_NATIVE_LIB_DEPENDENCIES`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_NATIVE_LIB_DEPENDENCIES.html#prop_tgt:ANDROID_NATIVE_LIB_DEPENDENCIES)
+- [`ANDROID_NATIVE_LIB_DIRECTORIES`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_NATIVE_LIB_DIRECTORIES.html#prop_tgt:ANDROID_NATIVE_LIB_DIRECTORIES)
+- [`ANDROID_PROCESS_MAX`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_PROCESS_MAX.html#prop_tgt:ANDROID_PROCESS_MAX)
+- [`ANDROID_PROGUARD_CONFIG_PATH`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_PROGUARD_CONFIG_PATH.html#prop_tgt:ANDROID_PROGUARD_CONFIG_PATH)
+- [`ANDROID_PROGUARD`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_PROGUARD.html#prop_tgt:ANDROID_PROGUARD)
+- [`ANDROID_SECURE_PROPS_PATH`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_SECURE_PROPS_PATH.html#prop_tgt:ANDROID_SECURE_PROPS_PATH)
+- [`ANDROID_SKIP_ANT_STEP`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_SKIP_ANT_STEP.html#prop_tgt:ANDROID_SKIP_ANT_STEP)
+- [`ANDROID_STL_TYPE`](https://cmake.org/cmake/help/v3.20/prop_tgt/ANDROID_STL_TYPE.html#prop_tgt:ANDROID_STL_TYPE)
+
  
+
+#### 交叉编译 for iOS, tvOS, or watchOS
+
+
 
 
 
