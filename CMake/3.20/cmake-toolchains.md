@@ -201,5 +201,103 @@ set(CMAKE_SYSTEM_VERSION 8.1)
 
 #### 交叉编译 for Android
 
+可以在toolchain文件中设定`CMAKE_SYSTEM_NAME`变量的值为`Android`来设置Android交叉编译。然后还需设置的是所使用的Android开发环境。
+
+For [Visual Studio Generators](https://cmake.org/cmake/help/v3.20/manual/cmake-generators.7.html#visual-studio-generators), CMake expects [NVIDIA Nsight Tegra Visual Studio Edition](https://cmake.org/cmake/help/v3.20/manual/cmake-toolchains.7.html#cross-compiling-for-android-with-nvidia-nsight-tegra-visual-studio-edition) or the [Visual Studio tools for Android](https://cmake.org/cmake/help/v3.20/manual/cmake-toolchains.7.html#cross-compiling-for-android-with-the-ndk) to be installed. See those sections for further configuration details.
+
+对于 `Makefile Generators`和`Ninja Generators，CMake可使用下面的环境之一：
+
++ NDK
++ Standalone Toolchain
+
+CMake通过下面的步骤来选取一种环境：
+
++ 如果`CMAKE_ANDROID_NDK`变量被设置，将使用NDK环境。
++ 否则，如果`CMAKE_ANDROID_STANDALONE_TOOLCHAIN`变量被设置，将使用Standalone Toolchain。
++ 否则，如果`CMAKE_SYSROOT`变量被设置为一个路径，且形如`<ndk>/platforms/android-<api>/arch-<arch>`，那么将使用NDK环境，而且`<ndk>`部分将作为`CMAKE_ANDROID_NDK`的值。
++ 否则，如果`CMAKE_SYSROOT`变量被设置为一个路径，且形如`<standalon-toolchain>/sysroot`，那么将使用Standalone Toolchain，而且`<standalone-toolchain>`部分将作为`CMAKE_ANDROID_STANDALONE_TOOLCHAIN`的值。
++ 否则，如果设置了一个名为`ANDROID_NDK`的cmake变量，将使用NDK环境，且用该变量的值作为`CMAKE_ANDROID_NDK`的值。
++ 否则，如果设置了一个名为`ANDROID_STANDALONE_TOOLCHAIN`的cmake变量，将使用Standalone Toolchain，且用该变量的值作为`CMAKE_ANDROID_STANDALONE_TOOLCHAIN`的值。
++ 否则，如果设置了一个名为`ANDROID_NDK_ROOT`或`ANDROID_NDK`的环境变量，将使用NDK环境，且环境变量的值作为`CMAKE_ANDROID_NDK`的值。
++ 否则，如果设置了一个名为`ANDROID_STANDALONE_TOOLCHAIN`的环境变量，将使用Standalone Toolchain，且环境变量的值作为`CMAKE_ANDROID_STANDALONE_TOOLCHAIN`的值。
++ 否则，将报告错误。NDK和Standalone Toolchain都找不到。
+
+##### 使用NDK交叉编译 for Android
+
+A toolchain file may configure [Makefile Generators](https://cmake.org/cmake/help/v3.20/manual/cmake-generators.7.html#makefile-generators), [Ninja Generators](https://cmake.org/cmake/help/v3.20/manual/cmake-generators.7.html#ninja-generators), or [Visual Studio Generators](https://cmake.org/cmake/help/v3.20/manual/cmake-generators.7.html#visual-studio-generators) to target Android for cross-compiling.
+
+通过下面的变量来配置Android的NDK环境：
+
++ `CMAKE_SYSTEM_NAME`
+
+  设置为`Android`。必须设置为这个值以使启用Android交叉编译。
+
++ `CMAKE_SYSTEM_VERSION`
+
+  设置Android API Level。如果没有设置，将通过下面的步骤决定其值：
+
+  + 如果`CMAKE_ANDROID_API`变量设置了，将使用该变量的值。
+  + 如果`CMAKE_SYSROOT`变量设置了，将从NDK目录结构中探测sysroot得到API Level。
+  + 否则，将使用NDK中最近可用的API Level。
+
++ `CMAKE_ANDROID_ARCH_ABI`
+
+  设置Android ABI（处理器架构）。如果没有设置，默认值将会是`armeabi`、`armeabi-v7a`、`arm64-v8a`中第一个被支持的。`CMAKE_ANDROID_ARCH`变量的值将会从`CMAKE_ANDROID_ARCH_ABI`自动计算出来。另外，关注`CMAKE_ANDROID_ARM_MODE`和`CMAKE_ANDROID_ARM_NEON`变量。
+
++ `CMAKE_ANDROID_NDK`
+
+  设置Android NDK根目录的绝对路径。
+
++ `CMAKE_ANDROID_NDK_DEPRECATED_HEADERS`
+
+  Set to a true value to use the deprecated per-api-level headers instead of the unified headers. If not specified, the default will be false unless using a NDK that does not provide unified headers.
+
++ `CMAKE_ANDROID_NDK_TOOLCHAIN_VERION`
+
+  在NDK r19及以上，这个变量必须不设置或设为`clang`。在NDK r18及以下，设置这个变量的值为NDK工具链的版本来选择编译器。如果没有设置，默认将会是最近可用的GCC工具链。
+
++ `CMAKE_ANDROID_STL_TYPE`
+
+  Set to specify which C++ standard library to use. If not specified, a default will be selected as described in the variable documentation.
+
+下面的变量将会被自动计算出：
+
++ `CMAKE_<LANG>_ANDROID_TOOLCHAIN_PREFIX`
+
+  The absolute path prefix to the binutils in the NDK toolchain
+
++ `CMAKE_<LANG>_ANDROID_TOOLCHAIN_SUFFIX`
+
+  The host platform suffix of the binutils in the NDK toolchain.
+
+这里是一个示例，一个toolchain文件可能如此：
+
+```cmake
+set(CMAKE_SYSTEM_NAME Android)
+set(CMAKE_SYSTEM_VERSION 21) # API level
+set(CMAKE_ANDROID_ARCH_ABI arm64-v8a)
+set(CMAKE_ANDROID_NDK /path/to/android-ndk)
+set(CMAKE_ANDROID_STL_TYPE gnustl_static)
+```
+
+你也可以不通过toolchain文件来指定这些变量：
+
+```shell
+$ cmake ../src \
+  -DCMAKE_SYSTEM_NAME=Android \
+  -DCMAKE_SYSTEM_VERSION=21 \
+  -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a \
+  -DCMAKE_ANDROID_NDK=/path/to/android-ndk \
+  -DCMAKE_ANDROID_STL_TYPE=gnustl_static
+```
+
+
+
+##### 使用Standalone Toolchain来交叉编译 for Android
+
+ 
+
+
+
 
 
